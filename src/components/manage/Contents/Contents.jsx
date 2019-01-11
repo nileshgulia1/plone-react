@@ -9,10 +9,11 @@ import { connect } from 'react-redux';
 import { Portal } from 'react-portal';
 import { bindActionCreators } from 'redux';
 import Helmet from 'react-helmet';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import {
   Breadcrumb,
   Confirm,
+  Container,
   Dropdown,
   Menu,
   Icon,
@@ -863,7 +864,7 @@ export default class ContentsComponent extends Component {
     const path = getBaseUrl(this.props.pathname);
 
     return (
-      <div id="page-contents">
+      <Container id="page-contents">
         <Helmet title={this.props.intl.formatMessage(messages.contents)} />
         <div className="container">
           <article id="content">
@@ -1270,7 +1271,7 @@ export default class ContentsComponent extends Component {
             }
           />
         </Portal>
-      </div>
+      </Container>
     );
   }
 }

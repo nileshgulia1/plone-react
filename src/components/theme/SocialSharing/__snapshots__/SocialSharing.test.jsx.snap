@@ -1,7 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`SocialSharing renders a social sharing component 1`] = `
-<div>
+<div
+  className="ui container"
+  style={
+    Object {
+      "clear": "both",
+    }
+  }
+>
   <br />
   <div
     className="SocialMediaShareButton SocialMediaShareButton--facebook"
@@ -13,10 +20,8 @@ exports[`SocialSharing renders a social sharing component 1`] = `
   >
     <button
       className="ui facebook mini button"
-      disabled={undefined}
       onClick={[Function]}
       role="button"
-      tabIndex={undefined}
     >
       Facebook
     </button>
@@ -31,10 +36,8 @@ exports[`SocialSharing renders a social sharing component 1`] = `
   >
     <button
       className="ui twitter mini button"
-      disabled={undefined}
       onClick={[Function]}
       role="button"
-      tabIndex={undefined}
     >
       Twitter
     </button>

@@ -5,41 +5,39 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Helmet from 'react-helmet';
 import { connect } from 'react-redux';
 import { Portal } from 'react-portal';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { Dropdown, Icon } from 'semantic-ui-react';
 import { injectIntl, intlShape } from 'react-intl';
 import { find } from 'lodash';
+import qs from 'query-string';
+import { views } from '~/config';
 
 import {
   Comments,
-  DocumentView,
-  FileView,
-  ImageView,
-  ListingView,
-  NewsItemView,
   SocialSharing,
-  SummaryView,
-  TabularView,
   Tags,
   Toolbar,
   Actions,
   Display,
+  NotFound,
   Types,
   Workflow,
 } from '../../../components';
 import { listActions, getContent } from '../../../actions';
-import { getBaseUrl } from '../../../helpers';
+import { BodyClass, getBaseUrl, getLayoutFieldname } from '../../../helpers';
 
 @injectIntl
 @connect(
   (state, props) => ({
     actions: state.actions.actions,
     content: state.content.data,
+    error: state.content.get.error,
     pathname: props.location.pathname,
-    versionId: props.location.query && props.location.query.version_id,
+    versionId:
+      qs.parse(props.location.search) &&
+      qs.parse(props.location.search).version_id,
   }),
   {
     listActions,
@@ -72,6 +70,10 @@ export default class View extends Component {
      * Pathname of the object
      */
     pathname: PropTypes.string.isRequired,
+    location: PropTypes.shape({
+      search: PropTypes.string,
+      pathname: PropTypes.string,
+    }).isRequired,
     /**
      * Version id of the object
      */
@@ -106,6 +108,12 @@ export default class View extends Component {
       subjects: PropTypes.arrayOf(PropTypes.string),
       is_folderish: PropTypes.bool,
     }),
+    error: PropTypes.shape({
+      /**
+       * Error type
+       */
+      status: PropTypes.number,
+    }),
     intl: intlShape.isRequired,
   };
 
@@ -118,6 +126,7 @@ export default class View extends Component {
     actions: null,
     content: null,
     versionId: null,
+    error: null,
   };
 
   state = {
@@ -130,8 +139,11 @@ export default class View extends Component {
    * @returns {undefined}
    */
   componentWillMount() {
-    this.props.listActions(this.props.pathname);
-    this.props.getContent(this.props.pathname, this.props.versionId);
+    this.props.listActions(getBaseUrl(this.props.pathname));
+    this.props.getContent(
+      getBaseUrl(this.props.pathname),
+      this.props.versionId,
+    );
   }
 
   /**
@@ -142,8 +154,11 @@ export default class View extends Component {
    */
   componentWillReceiveProps(nextProps) {
     if (nextProps.pathname !== this.props.pathname) {
-      this.props.listActions(nextProps.pathname);
-      this.props.getContent(nextProps.pathname, this.props.versionId);
+      this.props.listActions(getBaseUrl(nextProps.pathname));
+      this.props.getContent(
+        getBaseUrl(nextProps.pathname),
+        this.props.versionId,
+      );
     }
 
     if (nextProps.actions.object_buttons) {
@@ -155,46 +170,66 @@ export default class View extends Component {
   }
 
   /**
+   * Default fallback view
+   * @method getViewDefault
+   * @returns {string} Markup for component.
+   */
+  getViewDefault = () => views.defaultView;
+
+  /**
+   * Get view by content type
+   * @method getViewByType
+   * @returns {string} Markup for component.
+   */
+  getViewByType = () =>
+    views.contentTypesViews[this.props.content['@type']] || null;
+
+  /**
+   * Get view by content layout property
+   * @method getViewByLayout
+   * @returns {string} Markup for component.
+   */
+  getViewByLayout = () =>
+    views.layoutViews[
+      this.props.content[getLayoutFieldname(this.props.content)]
+    ] || null;
+
+  /**
+   * Cleans the component displayName (specially for connected components)
+   * which have the Connect(componentDisplayName)
+   * @method cleanViewName
+   * @param  {string} dirtyDisplayName The displayName
+   * @returns {string} Clean displayName (no Connect(...)).
+   */
+  cleanViewName = dirtyDisplayName =>
+    dirtyDisplayName
+      .replace('Connect(', '')
+      .replace(')', '')
+      .toLowerCase();
+
+  /**
    * Render method.
    * @method render
    * @returns {string} Markup for the component.
    */
   render() {
+    if (this.props.error) {
+      let FoundView = views.errorViews[this.props.error.status.toString()];
+      if (!FoundView) {
+        FoundView = views.errorViews['404']; // default to 404
+      }
+      return (
+        <div id="view">
+          <FoundView />
+        </div>
+      );
+    }
     if (!this.props.content) {
       return <span />;
     }
+    const RenderedView =
+      this.getViewByType() || this.getViewByLayout() || this.getViewDefault();
 
-    let view;
-
-    switch (this.props.content.layout) {
-      case 'summary_view':
-        view = <SummaryView content={this.props.content} />;
-        break;
-      case 'tabular_view':
-        view = <TabularView content={this.props.content} />;
-        break;
-      case 'listing_view':
-        view = <ListingView content={this.props.content} />;
-        break;
-      case 'news_item_view':
-        view = <NewsItemView content={this.props.content} />;
-        break;
-      case 'file_view':
-        view = <FileView content={this.props.content} />;
-        break;
-      case 'image_view':
-        view = <ImageView content={this.props.content} />;
-        break;
-      default:
-        view = <DocumentView content={this.props.content} />;
-        break;
-    }
-
-    const viewName = view.type
-      ? view.type.WrappedComponent
-        ? view.type.WrappedComponent.name
-        : view.type.name
-      : view.constructor.name;
     const path = getBaseUrl(this.props.pathname);
     const editAction = find(this.props.actions.object, { id: 'edit' });
     const folderContentsAction = find(this.props.actions.object, {
@@ -207,12 +242,19 @@ export default class View extends Component {
 
     return (
       <div id="view">
-        <Helmet
-          bodyAttributes={{
-            class: `view-${viewName.toLowerCase()}`,
-          }}
+        <BodyClass
+          className={
+            RenderedView.displayName
+              ? `view-${this.cleanViewName(RenderedView.displayName)}`
+              : null
+          }
         />
-        {view}
+
+        <RenderedView
+          content={this.props.content}
+          location={this.props.location}
+        />
+
         {this.props.content.subjects &&
           this.props.content.subjects.length > 0 && (
             <Tags tags={this.props.content.subjects} />
@@ -256,8 +298,7 @@ export default class View extends Component {
                       />
                     </Link>
                   )}
-                {this.props.content &&
-                  this.props.content.is_folderish && <Types pathname={path} />}
+                <Types pathname={path} />
 
                 <Dropdown
                   id="toolbar-more"

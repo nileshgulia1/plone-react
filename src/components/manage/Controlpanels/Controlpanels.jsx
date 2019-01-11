@@ -6,7 +6,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { concat, filter, last, map, uniqBy } from 'lodash';
 import { Portal } from 'react-portal';
@@ -88,6 +88,11 @@ export default class Controlpanels extends Component {
           '@id': '/moderate-comments',
           group: 'Content',
           title: 'Moderate Comments',
+        },
+        {
+          '@id': '/users',
+          group: 'Users',
+          title: 'Users and Groups',
         },
       ]),
       controlpanel => ({

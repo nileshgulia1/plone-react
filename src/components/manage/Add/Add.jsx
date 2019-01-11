@@ -8,17 +8,25 @@ import PropTypes from 'prop-types';
 import Helmet from 'react-helmet';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { browserHistory } from 'react-router';
+import { Router, withRouter } from 'react-router-dom';
 import { asyncConnect } from 'redux-connect';
-import { isEmpty, pick } from 'lodash';
+import { keys, isEmpty, pick } from 'lodash';
 import { defineMessages, injectIntl, intlShape } from 'react-intl';
 import { Portal } from 'react-portal';
 import { Icon } from 'semantic-ui-react';
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+import qs from 'query-string';
+import { settings } from '~/config';
 
 import { createContent, getSchema } from '../../../actions';
 import { Form, Toolbar } from '../../../components';
-import config from '../../../config';
-import { getBaseUrl } from '../../../helpers';
+import {
+  getBaseUrl,
+  hasTilesData,
+  getTilesFieldname,
+  getTilesLayoutFieldname,
+} from '../../../helpers';
 
 const messages = defineMessages({
   add: {
@@ -33,17 +41,27 @@ const messages = defineMessages({
     id: 'Cancel',
     defaultMessage: 'Cancel',
   },
+  properties: {
+    id: 'Properties',
+    defaultMessage: 'Properties',
+  },
+  visual: {
+    id: 'Visual',
+    defaultMessage: 'Visual',
+  },
 });
 
+@DragDropContext(HTML5Backend)
 @injectIntl
 @connect(
   (state, props) => ({
-    request: state.content.create,
+    createRequest: state.content.create,
+    schemaRequest: state.schema,
     content: state.content.data,
     schema: state.schema.schema,
     pathname: props.location.pathname,
-    returnUrl: props.location.query.return_url,
-    type: props.location.query.type,
+    returnUrl: qs.parse(props.location.search).return_url,
+    type: qs.parse(props.location.search).type,
   }),
   dispatch => bindActionCreators({ createContent, getSchema }, dispatch),
 )
@@ -66,9 +84,14 @@ export class AddComponent extends Component {
     content: PropTypes.shape({
       // eslint-disable-line react/no-unused-prop-types
       '@id': PropTypes.string,
+      '@type': PropTypes.string,
     }),
     returnUrl: PropTypes.string,
-    request: PropTypes.shape({
+    createRequest: PropTypes.shape({
+      loading: PropTypes.bool,
+      loaded: PropTypes.bool,
+    }).isRequired,
+    schemaRequest: PropTypes.shape({
       loading: PropTypes.bool,
       loaded: PropTypes.bool,
     }).isRequired,
@@ -96,8 +119,12 @@ export class AddComponent extends Component {
    */
   constructor(props) {
     super(props);
+    this.state = {
+      visual: false,
+    };
     this.onCancel = this.onCancel.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
+    this.onToggleVisual = this.onToggleVisual.bind(this);
   }
 
   /**
@@ -116,11 +143,22 @@ export class AddComponent extends Component {
    * @returns {undefined}
    */
   componentWillReceiveProps(nextProps) {
-    if (this.props.request.loading && nextProps.request.loaded) {
-      browserHistory.push(
+    if (
+      this.props.createRequest.loading &&
+      nextProps.createRequest.loaded &&
+      nextProps.content['@type'] === this.props.type
+    ) {
+      this.props.history.push(
         this.props.returnUrl ||
-          nextProps.content['@id'].replace(config.apiPath, ''),
+          nextProps.content['@id'].replace(settings.apiPath, ''),
       );
+    }
+    if (this.props.schemaRequest.loading && nextProps.schemaRequest.loaded) {
+      if (hasTilesData(nextProps.schema.properties)) {
+        this.setState({
+          visual: true,
+        });
+      }
     }
   }
 
@@ -133,6 +171,9 @@ export class AddComponent extends Component {
   onSubmit(data) {
     this.props.createContent(getBaseUrl(this.props.pathname), {
       ...data,
+      '@static_behaviors': this.props.schema.definitions
+        ? keys(this.props.schema.definitions)
+        : null,
       '@type': this.props.type,
     });
   }
@@ -143,7 +184,18 @@ export class AddComponent extends Component {
    * @returns {undefined}
    */
   onCancel() {
-    browserHistory.push(getBaseUrl(this.props.pathname));
+    this.props.history.push(getBaseUrl(this.props.pathname));
+  }
+
+  /**
+   * Toggle visual
+   * @method onToggleVisual
+   * @returns {undefined}
+   */
+  onToggleVisual() {
+    this.setState({
+      visual: !this.state.visual,
+    });
   }
 
   /**
@@ -152,7 +204,7 @@ export class AddComponent extends Component {
    * @returns {string} Markup for the component.
    */
   render() {
-    if (this.props.schema) {
+    if (this.props.schemaRequest.loaded) {
       return (
         <div id="page-add">
           <Helmet
@@ -167,19 +219,25 @@ export class AddComponent extends Component {
               }
             }}
             schema={this.props.schema}
+            formData={{
+              [getTilesFieldname(this.props.schema.properties)]: null,
+              [getTilesLayoutFieldname(this.props.schema.properties)]: null,
+            }}
             onSubmit={this.onSubmit}
             hideActions
+            pathname={this.props.pathname}
+            visual={this.state.visual}
             title={this.props.intl.formatMessage(messages.add, {
               type: this.props.type,
             })}
-            loading={this.props.request.loading}
+            loading={this.props.createRequest.loading}
           />
           <Portal node={__CLIENT__ && document.getElementById('toolbar')}>
             <Toolbar
               pathname={this.props.pathname}
               inner={
                 <div>
-                  <a className="item" icon onClick={() => this.form.onSubmit()}>
+                  <a className="item" onClick={() => this.form.onSubmit()}>
                     <Icon
                       name="save"
                       size="big"
@@ -187,6 +245,19 @@ export class AddComponent extends Component {
                       title={this.props.intl.formatMessage(messages.save)}
                     />
                   </a>
+                  {hasTilesData(this.props.schema.properties) && (
+                    <a className="item" onClick={() => this.onToggleVisual()}>
+                      <Icon
+                        name={this.state.visual ? 'tasks' : 'block layout'}
+                        size="big"
+                        title={this.props.intl.formatMessage(
+                          this.state.visual
+                            ? messages.properties
+                            : messages.visual,
+                        )}
+                      />
+                    </a>
+                  )}
                   <a className="item" onClick={() => this.onCancel()}>
                     <Icon
                       name="close"
@@ -210,7 +281,7 @@ export default asyncConnect([
   {
     key: 'schema',
     promise: ({ location, store: { dispatch } }) =>
-      dispatch(getSchema(location.query.type)),
+      dispatch(getSchema(qs.parse(location.search).type)),
   },
   {
     key: 'content',
@@ -227,4 +298,4 @@ export default asyncConnect([
       return Promise.resolve(getState().content);
     },
   },
-])(AddComponent);
+])(withRouter(AddComponent));

@@ -10,8 +10,8 @@ import { Button, Divider, Menu } from 'semantic-ui-react';
 import jwtDecode from 'jwt-decode';
 import cookie from 'react-cookie';
 import { injectIntl } from 'react-intl';
-
-import LogoImage from './pastanaga.svg';
+import LogoImage from '@plone/volto/components/manage/Toolbar/pastanaga.svg';
+import { BodyClass } from '../../../helpers';
 
 @injectIntl
 @connect(state => ({
@@ -92,6 +92,7 @@ export default class Toolbar extends Component {
     return (
       this.props.token && (
         <Fragment>
+          <BodyClass className="has-toolbar" />
           <Menu
             vertical
             borderless

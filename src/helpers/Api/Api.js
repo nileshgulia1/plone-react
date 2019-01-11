@@ -6,7 +6,7 @@
 import superagent from 'superagent';
 import cookie from 'react-cookie';
 
-import config from '../../config';
+import { settings } from '~/config';
 
 const methods = ['get', 'post', 'put', 'patch', 'del'];
 
@@ -18,7 +18,7 @@ const methods = ['get', 'post', 'put', 'patch', 'del'];
  */
 function formatUrl(path) {
   const adjustedPath = path[0] !== '/' ? `/${path}` : path;
-  return `${config.apiPath}${adjustedPath}`;
+  return `${settings.apiPath}${adjustedPath}`;
 }
 
 /**
@@ -57,7 +57,7 @@ export class Api {
           }
 
           request.end(
-            (err, { body } = {}) => (err ? reject(body || err) : resolve(body)),
+            (err, { body } = {}) => (err ? reject(err) : resolve(body)),
           );
         });
     });

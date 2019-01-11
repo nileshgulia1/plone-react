@@ -9,11 +9,13 @@ dist
 junit.xml
 eslint.xml
 yarn-error.log
+build
 
 # Other
 .DS_Store
 .idea
 lighthouse-report.html
+.vscode/
 
 # Python
 /api/eggs/
@@ -29,6 +31,8 @@ api/.Python
 api/include
 api/lib
 api/pip-selfcheck.json
+/bin
+/lib
 
 # Tests
 /tests/bin
@@ -41,3 +45,4 @@ log.html
 output.xml
 report.html
 selenium-screenshot-*.png
+/selenium/

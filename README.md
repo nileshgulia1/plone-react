@@ -1,17 +1,21 @@
-# Plone in React
+# Volto
 
-[![Build Status](https://travis-ci.org/plone/plone-react.svg?branch=master)](https://travis-ci.org/plone/plone-react)
-[![Coverage](https://img.shields.io/coveralls/plone/plone-react.svg)](https://coveralls.io/github/plone/plone-react)
-[![Dependencies](https://img.shields.io/david/plone/plone-react.svg)](https://github.com/plone/plone-react/blob/master/package.json)
-[![Dev Dependencies](https://img.shields.io/david/dev/plone/plone-react.svg)](https://github.com/plone/plone-react/blob/master/package.json)
-[![NPM](https://img.shields.io/npm/v/@plone/plone-react.svg)](https://www.npmjs.com/package/@plone/plone-react)
+[![Build Status](https://travis-ci.org/plone/volto.svg?branch=master)](https://travis-ci.org/plone/volto)
+[![Coverage](https://img.shields.io/coveralls/plone/volto.svg)](https://coveralls.io/github/plone/volto)
+[![Dependencies](https://img.shields.io/david/plone/volto.svg)](https://github.com/plone/volto/blob/master/package.json)
+[![Dev Dependencies](https://img.shields.io/david/dev/plone/volto.svg)](https://github.com/plone/volto/blob/master/package.json)
+[![NPM](https://img.shields.io/npm/v/@plone/volto.svg)](https://www.npmjs.com/package/@plone/volto)
+
+## Documentation
+
+A training on how to create your own website using Volto is available as part of the Plone training at [https://training.plone.org/5/volto/index.html](https://training.plone.org/5/volto/index.html).
 
 ## Installation
 
 ### Prerequisites
 
-* [Node.js==8.9.4](https://nodejs.org/)
-* [Python==2.7.x](https://python.org/)
+- [Node.js==8.14.0](https://nodejs.org/)
+- [Python==2.7.x](https://python.org/)
 
 ### Install dependencies
 
@@ -35,11 +39,11 @@
 
 ### Run frontend
 
-    $ yarn dev
+    $ yarn start
 
 ### Browsing
 
-Go to [http://localhost:4300](http://localhost:4300) in your browser.
+Go to [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Testing
 
@@ -52,7 +56,7 @@ Go to [http://localhost:4300](http://localhost:4300) in your browser.
     Alternatively individual acceptances test case files can be run with a pure Robot Framework virtual environment, assuming that backend and frontend is running
 
     $ docker-compose -f api/docker-compose.yml up
-    $ yarn && yarn build && API_PATH=http://localhost:55001/plone yarn start
+    $ yarn && yarn build && RAZZLE_API_PATH=http://localhost:55001/plone yarn start:prod
 
     $ virtualenv robotenv --no-site-packages
     $ robotenv/bin/pip install robotframework robotframework-seleniumlibrary robotframework-webpack
@@ -82,11 +86,11 @@ In practice, this may look something like:<br />
 Plugins are automatically loaded if you have them installed in your package.json. Prettier plugin package names must start with `@prettier/plugin- or prettier-plugin-` to be registered.
 If the plugin is unable to be found automatically, you can load them with:
 
-1. The CLI, via the --plugin flag:
+1.  The CLI, via the --plugin flag:
 
 `prettier --write main.foo --plugin=./foo-plugin`
 
-1. Or the API, via the plugins field:
+1.  Or the API, via the plugins field:
 
 ```prettier.format("code", {
   parser: "foo",
@@ -98,7 +102,7 @@ If the plugin is unable to be found automatically, you can load them with:
 
 You can use Prettier with a pre-commit tool. This can re-format your files that are marked as "staged" via `git add` before you commit.
 
-1. <b>Lint staged</b> Use Case: Useful for when you need to use other tools on top of Prettier (e.g. ESLint)
+1.  <b>Lint staged</b> Use Case: Useful for when you need to use other tools on top of Prettier (e.g. ESLint)
 
 Install it along with husky:
 
@@ -117,7 +121,7 @@ and add this config to your `package.json`:
 }
 ```
 
-1. <b>Pretty-quick</b> Use Case: Great for when you want an entire file formatting on your changed/staged files.
+1.  <b>Pretty-quick</b> Use Case: Great for when you want an entire file formatting on your changed/staged files.
 
 `yarn add pretty-quick husky --dev`
 
@@ -133,7 +137,21 @@ and add this config to your package.json:
 
 More Precommit hooks can be found [here](https://prettier.io/docs/en/precommit.html)
 
-### License
+### Running Guillotina Tests
+
+First, start up Guillotina:
+
+```
+docker-compose -f g-api/docker-compose.yml up -d
+```
+
+Then, run the tests:
+
+```
+PYTHONPATH=$(pwd)/tests_guillotina env/bin/pybot -v BROWSER:headlesschrome tests_guillotina;
+```
+
+## License
 
 MIT License. Copyrights hold the Plone Foundation.
 See [LICENSE.md](LICENSE.md) for details.

@@ -8,16 +8,19 @@ import PropTypes from 'prop-types';
 import Helmet from 'react-helmet';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { browserHistory } from 'react-router';
+import { Router, withRouter } from 'react-router-dom';
 import { asyncConnect } from 'redux-connect';
 import { isEmpty, pick } from 'lodash';
 import { defineMessages, injectIntl, intlShape } from 'react-intl';
 import { Portal } from 'react-portal';
 import { Icon } from 'semantic-ui-react';
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+import qs from 'query-string';
 
 import { Form, Toolbar } from '../../../components';
 import { updateContent, getContent, getSchema } from '../../../actions';
-import { getBaseUrl } from '../../../helpers';
+import { getBaseUrl, hasTilesData } from '../../../helpers';
 
 const messages = defineMessages({
   edit: {
@@ -42,15 +45,17 @@ const messages = defineMessages({
   },
 });
 
+@DragDropContext(HTML5Backend)
 @injectIntl
 @connect(
   (state, props) => ({
     content: state.content.data,
     schema: state.schema.schema,
     getRequest: state.content.get,
+    schemaRequest: state.schema,
     updateRequest: state.content.update,
     pathname: props.location.pathname,
-    returnUrl: props.location.query.return_url,
+    returnUrl: qs.parse(props.location.search).return_url,
   }),
   dispatch =>
     bindActionCreators(
@@ -78,6 +83,10 @@ export class EditComponent extends Component {
     getContent: PropTypes.func.isRequired,
     getSchema: PropTypes.func.isRequired,
     updateRequest: PropTypes.shape({
+      loading: PropTypes.bool,
+      loaded: PropTypes.bool,
+    }).isRequired,
+    schemaRequest: PropTypes.shape({
       loading: PropTypes.bool,
       loaded: PropTypes.bool,
     }).isRequired,
@@ -140,8 +149,15 @@ export class EditComponent extends Component {
     if (this.props.getRequest.loading && nextProps.getRequest.loaded) {
       this.props.getSchema(nextProps.content['@type']);
     }
+    if (this.props.schemaRequest.loading && nextProps.schemaRequest.loaded) {
+      if (hasTilesData(nextProps.schema.properties)) {
+        this.setState({
+          visual: true,
+        });
+      }
+    }
     if (this.props.updateRequest.loading && nextProps.updateRequest.loaded) {
-      browserHistory.push(
+      this.props.history.push(
         this.props.returnUrl || getBaseUrl(this.props.pathname),
       );
     }
@@ -163,7 +179,7 @@ export class EditComponent extends Component {
    * @returns {undefined}
    */
   onCancel() {
-    browserHistory.push(
+    this.props.history.push(
       this.props.returnUrl || getBaseUrl(this.props.pathname),
     );
   }
@@ -185,7 +201,7 @@ export class EditComponent extends Component {
    * @returns {string} Markup for the component.
    */
   render() {
-    if (this.props.schema && this.props.content) {
+    if (this.props.schemaRequest.loaded && this.props.content) {
       return (
         <div id="page-edit">
           <Helmet
@@ -203,27 +219,12 @@ export class EditComponent extends Component {
             formData={this.props.content}
             onSubmit={this.onSubmit}
             hideActions
+            pathname={this.props.pathname}
             visual={this.state.visual}
             title={this.props.intl.formatMessage(messages.edit, {
               title: this.props.schema.title,
             })}
             loading={this.props.updateRequest.loading}
-            tiles={[
-              {
-                type: 'title',
-              },
-              {
-                type: 'text',
-                data: {
-                  text: {
-                    'content-type': 'text/html',
-                    data:
-                      '<h2>Some random header</h2><p>Some random text with <b>markup</b></p>',
-                    encoding: 'utf8',
-                  },
-                },
-              },
-            ]}
           />
           <Portal node={__CLIENT__ && document.getElementById('toolbar')}>
             <Toolbar
@@ -238,17 +239,19 @@ export class EditComponent extends Component {
                       title={this.props.intl.formatMessage(messages.save)}
                     />
                   </a>
-                  <a className="item" onClick={() => this.onToggleVisual()}>
-                    <Icon
-                      name={this.state.visual ? 'tasks' : 'block layout'}
-                      size="big"
-                      title={this.props.intl.formatMessage(
-                        this.state.visual
-                          ? messages.properties
-                          : messages.visual,
-                      )}
-                    />
-                  </a>
+                  {hasTilesData(this.props.schema.properties) && (
+                    <a className="item" onClick={() => this.onToggleVisual()}>
+                      <Icon
+                        name={this.state.visual ? 'tasks' : 'block layout'}
+                        size="big"
+                        title={this.props.intl.formatMessage(
+                          this.state.visual
+                            ? messages.properties
+                            : messages.visual,
+                        )}
+                      />
+                    </a>
+                  )}
                   <a className="item" onClick={() => this.onCancel()}>
                     <Icon
                       name="close"
@@ -289,4 +292,4 @@ export default asyncConnect([
       return Promise.resolve(getState().content);
     },
   },
-])(EditComponent);
+])(withRouter(EditComponent));

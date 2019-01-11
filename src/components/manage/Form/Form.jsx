@@ -5,19 +5,27 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { keys, map, uniq } from 'lodash';
+import { keys, map, mapValues, omit, uniq, without } from 'lodash';
+import move from 'lodash-move';
 import {
   Button,
+  Container,
   Form as UiForm,
   Segment,
   Tab,
   Message,
 } from 'semantic-ui-react';
 import { defineMessages, injectIntl, intlShape } from 'react-intl';
+import { v4 as uuid } from 'uuid';
 
-import { EditTitleTile, EditTextTile, Field } from '../../../components';
+import { EditTile, Field } from '../../../components';
+import { getTilesFieldname, getTilesLayoutFieldname } from '../../../helpers';
 
 const messages = defineMessages({
+  addTile: {
+    id: 'Add tile...',
+    defaultMessage: 'Add tile...',
+  },
   required: {
     id: 'Required input is missing.',
     defaultMessage: 'Required input is missing.',
@@ -69,9 +77,11 @@ class Form extends Component {
         }),
       ),
       properties: PropTypes.objectOf(PropTypes.any),
+      definitions: PropTypes.objectOf(PropTypes.any),
       required: PropTypes.arrayOf(PropTypes.string),
     }).isRequired,
     formData: PropTypes.objectOf(PropTypes.any),
+    pathname: PropTypes.string,
     onSubmit: PropTypes.func,
     onCancel: PropTypes.func,
     submitLabel: PropTypes.string,
@@ -94,7 +104,7 @@ class Form extends Component {
    * @static
    */
   static defaultProps = {
-    formData: {},
+    formData: null,
     onSubmit: null,
     onCancel: null,
     submitLabel: null,
@@ -106,22 +116,63 @@ class Form extends Component {
     hideActions: false,
     visual: false,
     tiles: [],
+    pathname: '',
   };
 
   /**
    * Constructor
    * @method constructor
    * @param {Object} props Component properties
-   * @constructs WysiwygEditor
+   * @constructs Form
    */
   constructor(props) {
     super(props);
+    const ids = {
+      title: uuid(),
+      description: uuid(),
+      text: uuid(),
+    };
+    let { formData } = props;
+    const tilesFieldname = getTilesFieldname(formData);
+    const tilesLayoutFieldname = getTilesLayoutFieldname(formData);
+
+    if (formData === null) {
+      // get defaults from schema
+      formData = mapValues(props.schema.properties, 'default');
+    }
+    // defaults for block editor; should be moved to schema on server side
+    if (!formData[tilesLayoutFieldname]) {
+      formData[tilesLayoutFieldname] = {
+        items: [ids.title, ids.description, ids.text],
+      };
+    }
+    if (!formData[tilesFieldname]) {
+      formData[tilesFieldname] = {
+        [ids.title]: {
+          '@type': 'title',
+        },
+        [ids.description]: {
+          '@type': 'description',
+        },
+        [ids.text]: {
+          '@type': 'text',
+        },
+      };
+    }
     this.state = {
-      formData: props.formData,
+      formData,
       errors: {},
+      selected:
+        formData[tilesLayoutFieldname].items.length > 0
+          ? formData[tilesLayoutFieldname].items[0]
+          : null,
     };
     this.onChangeField = this.onChangeField.bind(this);
-    this.onChange = this.onChange.bind(this);
+    this.onChangeTile = this.onChangeTile.bind(this);
+    this.onSelectTile = this.onSelectTile.bind(this);
+    this.onDeleteTile = this.onDeleteTile.bind(this);
+    this.onAddTile = this.onAddTile.bind(this);
+    this.onMoveTile = this.onMoveTile.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
   }
 
@@ -142,17 +193,99 @@ class Form extends Component {
   }
 
   /**
-   * Change handler
-   * @method onChange
-   * @param {Object} data Data to change
+   * Change tile handler
+   * @method onChangeTile
+   * @param {string} id Id of the tile
+   * @param {*} value Value of the field
    * @returns {undefined}
    */
-  onChange(data) {
-    if (data.properties) {
-      this.setState({
-        formData: data.properties,
-      });
-    }
+  onChangeTile(id, value) {
+    const tilesFieldname = getTilesFieldname(this.state.formData);
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        [getTilesFieldname(this.state.formData)]: {
+          ...this.state.formData[tilesFieldname],
+          [id]: value || null,
+        },
+      },
+    });
+  }
+
+  /**
+   * Select tile handler
+   * @method onSelectTile
+   * @param {string} id Id of the field
+   * @returns {undefined}
+   */
+  onSelectTile(id) {
+    this.setState({
+      selected: id,
+    });
+  }
+
+  /**
+   * Delete tile handler
+   * @method onDeleteTile
+   * @param {string} id Id of the field
+   * @param {bool} selectPrev True if previous should be selected
+   * @returns {undefined}
+   */
+  onDeleteTile(id, selectPrev) {
+    const tilesFieldname = getTilesFieldname(this.state.formData);
+    const tilesLayoutFieldname = getTilesLayoutFieldname(this.state.formData);
+
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        [tilesLayoutFieldname]: {
+          items: without(this.state.formData[tilesLayoutFieldname].items, id),
+        },
+        [tilesFieldname]: omit(this.state.formData[tilesFieldname], [id]),
+      },
+      selected: selectPrev
+        ? this.state.formData[tilesLayoutFieldname].items[
+            this.state.formData[tilesLayoutFieldname].items.indexOf(id) - 1
+          ]
+        : null,
+    });
+  }
+
+  /**
+   * Add tile handler
+   * @method onAddTile
+   * @param {string} type Type of the tile
+   * @param {Number} index Index where to add the tile
+   * @returns {string} Id of the tile
+   */
+  onAddTile(type, index) {
+    const id = uuid();
+    const tilesFieldname = getTilesFieldname(this.state.formData);
+    const tilesLayoutFieldname = getTilesLayoutFieldname(this.state.formData);
+    const totalItems = this.state.formData[tilesLayoutFieldname].items.length;
+    const insert = index === -1 ? totalItems : index;
+
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        [tilesLayoutFieldname]: {
+          items: [
+            ...this.state.formData[tilesLayoutFieldname].items.slice(0, insert),
+            id,
+            ...this.state.formData[tilesLayoutFieldname].items.slice(insert),
+          ],
+        },
+        [tilesFieldname]: {
+          ...this.state.formData[tilesFieldname],
+          [id]: {
+            '@type': type,
+          },
+        },
+      },
+      selected: id,
+    });
+
+    return id;
   }
 
   /**
@@ -209,158 +342,180 @@ class Form extends Component {
   }
 
   /**
+   * Move tile handler
+   * @method onMoveTile
+   * @param {number} dragIndex Drag index.
+   * @param {number} hoverIndex Hover index.
+   * @returns {undefined}
+   */
+  onMoveTile(dragIndex, hoverIndex) {
+    const tilesLayoutFieldname = getTilesLayoutFieldname(this.state.formData);
+
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        [tilesLayoutFieldname]: {
+          items: move(
+            this.state.formData[tilesLayoutFieldname].items,
+            dragIndex,
+            hoverIndex,
+          ),
+        },
+      },
+    });
+  }
+
+  /**
    * Render method.
    * @method render
    * @returns {string} Markup for the component.
    */
   render() {
     const { schema, onCancel, onSubmit } = this.props;
-
+    const { formData } = this.state;
+    const tilesFieldname = getTilesFieldname(formData);
+    const tilesLayoutFieldname = getTilesLayoutFieldname(formData);
+    const renderTiles = formData[tilesLayoutFieldname].items;
+    const tilesDict = formData[tilesFieldname];
     return this.props.visual ? (
-      <div>
-        {map(this.props.tiles, tile => {
-          switch (tile.type) {
-            case 'title':
-              return (
-                <EditTitleTile
-                  onChange={this.onChange}
-                  properties={this.state.formData}
-                />
-              );
-            case 'text':
-              return <EditTextTile onChange={this.onChange} data={tile.data} />;
-            default:
-              break;
-          }
-          return <div />;
-        })}
-        <div>
-          <Button
-            basic
-            circular
-            icon="plus"
-            title={
-              this.props.submitLabel
-                ? this.props.submitLabel
-                : this.props.intl.formatMessage(messages.save)
-            }
+      <div className="ui wrapper">
+        {map(renderTiles, (tile, index) => (
+          <EditTile
+            id={tile}
+            index={index}
+            type={tilesDict[tile]['@type']}
+            key={tile}
+            onAddTile={this.onAddTile}
+            onChangeTile={this.onChangeTile}
+            onChangeField={this.onChangeField}
+            onDeleteTile={this.onDeleteTile}
+            onSelectTile={this.onSelectTile}
+            onMoveTile={this.onMoveTile}
+            properties={formData}
+            data={tilesDict[tile]}
+            pathname={this.props.pathname}
+            tile={tile}
+            selected={this.state.selected === tile}
           />
-        </div>
+        ))}
       </div>
     ) : (
-      <UiForm
-        method="post"
-        onSubmit={this.onSubmit}
-        error={keys(this.state.errors).length > 0}
-      >
-        <Segment.Group raised>
-          {schema.fieldsets.length > 1 && (
-            <Tab
-              menu={{
-                secondary: true,
-                pointing: true,
-                attached: true,
-                tabular: true,
-              }}
-              panes={map(schema.fieldsets, item => ({
-                menuItem: item.title,
-                render: () => [
-                  this.props.title && (
-                    <Segment secondary attached>
-                      {this.props.title}
-                    </Segment>
-                  ),
-                  ...map(item.fields, field => (
-                    <Field
-                      {...schema.properties[field]}
-                      id={field}
-                      value={this.state.formData[field]}
-                      required={schema.required.indexOf(field) !== -1}
-                      onChange={this.onChangeField}
-                      key={field}
-                      error={this.state.errors[field]}
-                    />
-                  )),
-                ],
-              }))}
-            />
-          )}
-          {schema.fieldsets.length === 1 && (
-            <Segment>
-              {this.props.title && (
-                <Segment className="primary">{this.props.title}</Segment>
-              )}
-              {this.props.description && (
-                <Segment secondary>{this.props.description}</Segment>
-              )}
-              {keys(this.state.errors).length > 0 && (
-                <Message
-                  icon="warning"
-                  negative
-                  attached
-                  header={this.props.intl.formatMessage(messages.error)}
-                  content={this.props.intl.formatMessage(
-                    messages.thereWereSomeErrors,
-                  )}
-                />
-              )}
-              {this.props.error && (
-                <Message
-                  icon="warning"
-                  negative
-                  attached
-                  header={this.props.intl.formatMessage(messages.error)}
-                  content={this.props.error.message}
-                />
-              )}
-              {map(schema.fieldsets[0].fields, field => (
-                <Field
-                  {...schema.properties[field]}
-                  id={field}
-                  value={this.state.formData[field]}
-                  required={schema.required.indexOf(field) !== -1}
-                  onChange={this.onChangeField}
-                  key={field}
-                  error={this.state.errors[field]}
-                />
-              ))}
-            </Segment>
-          )}
-          {!this.props.hideActions && (
-            <Segment className="actions" clearing>
-              {onSubmit && (
-                <Button
-                  basic
-                  circular
-                  primary
-                  floated="right"
-                  icon="arrow right"
-                  type="submit"
-                  title={
-                    this.props.submitLabel
-                      ? this.props.submitLabel
-                      : this.props.intl.formatMessage(messages.save)
-                  }
-                  size="big"
-                  loading={this.props.loading}
-                />
-              )}
-              {onCancel && (
-                <Button
-                  basic
-                  circular
-                  secondary
-                  icon="remove"
-                  title={this.props.intl.formatMessage(messages.cancel)}
-                  floated="right"
-                  size="big"
-                  onClick={onCancel}
-                />
-              )}
-            </Segment>
-          )}
-        </Segment.Group>
-      </UiForm>
+      <Container>
+        <UiForm
+          method="post"
+          onSubmit={this.onSubmit}
+          error={keys(this.state.errors).length > 0}
+        >
+          <Segment.Group raised>
+            {schema.fieldsets.length > 1 && (
+              <Tab
+                menu={{
+                  secondary: true,
+                  pointing: true,
+                  attached: true,
+                  tabular: true,
+                }}
+                panes={map(schema.fieldsets, item => ({
+                  menuItem: item.title,
+                  render: () => [
+                    this.props.title && (
+                      <Segment secondary attached>
+                        {this.props.title}
+                      </Segment>
+                    ),
+                    ...map(item.fields, (field, index) => (
+                      <Field
+                        {...schema.properties[field]}
+                        id={field}
+                        focus={index === 0}
+                        value={this.state.formData[field]}
+                        required={schema.required.indexOf(field) !== -1}
+                        onChange={this.onChangeField}
+                        key={field}
+                        error={this.state.errors[field]}
+                      />
+                    )),
+                  ],
+                }))}
+              />
+            )}
+            {schema.fieldsets.length === 1 && (
+              <Segment>
+                {this.props.title && (
+                  <Segment className="primary">{this.props.title}</Segment>
+                )}
+                {this.props.description && (
+                  <Segment secondary>{this.props.description}</Segment>
+                )}
+                {keys(this.state.errors).length > 0 && (
+                  <Message
+                    icon="warning"
+                    negative
+                    attached
+                    header={this.props.intl.formatMessage(messages.error)}
+                    content={this.props.intl.formatMessage(
+                      messages.thereWereSomeErrors,
+                    )}
+                  />
+                )}
+                {this.props.error && (
+                  <Message
+                    icon="warning"
+                    negative
+                    attached
+                    header={this.props.intl.formatMessage(messages.error)}
+                    content={this.props.error.message}
+                  />
+                )}
+                {map(schema.fieldsets[0].fields, field => (
+                  <Field
+                    {...schema.properties[field]}
+                    id={field}
+                    value={this.state.formData[field]}
+                    required={schema.required.indexOf(field) !== -1}
+                    onChange={this.onChangeField}
+                    key={field}
+                    error={this.state.errors[field]}
+                  />
+                ))}
+              </Segment>
+            )}
+            {!this.props.hideActions && (
+              <Segment className="actions" clearing>
+                {onSubmit && (
+                  <Button
+                    basic
+                    circular
+                    primary
+                    floated="right"
+                    icon="arrow right"
+                    type="submit"
+                    title={
+                      this.props.submitLabel
+                        ? this.props.submitLabel
+                        : this.props.intl.formatMessage(messages.save)
+                    }
+                    size="big"
+                    loading={this.props.loading}
+                  />
+                )}
+                {onCancel && (
+                  <Button
+                    basic
+                    circular
+                    secondary
+                    icon="remove"
+                    title={this.props.intl.formatMessage(messages.cancel)}
+                    floated="right"
+                    size="big"
+                    onClick={onCancel}
+                  />
+                )}
+              </Segment>
+            )}
+          </Segment.Group>
+        </UiForm>
+      </Container>
     );
   }
 }

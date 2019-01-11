@@ -4,11 +4,11 @@
  */
 
 import React from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { defineMessages, injectIntl, intlShape } from 'react-intl';
 import { Image } from 'semantic-ui-react';
 
-import LogoImage from './Logo.svg';
+import LogoImage from '@plone/volto/components/theme/Logo/Logo.svg';
 
 const messages = defineMessages({
   site: {

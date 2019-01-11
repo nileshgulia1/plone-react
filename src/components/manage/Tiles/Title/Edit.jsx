@@ -8,6 +8,18 @@ import { Map } from 'immutable';
 import PropTypes from 'prop-types';
 import { stateFromHTML } from 'draft-js-import-html';
 import { Editor, DefaultDraftBlockRenderMap, EditorState } from 'draft-js';
+import { defineMessages, injectIntl, intlShape } from 'react-intl';
+import { Button } from 'semantic-ui-react';
+
+import { Icon } from '../../../../components';
+import trashSVG from '../../../../icons/delete.svg';
+
+const messages = defineMessages({
+  title: {
+    id: 'Type the title…',
+    defaultMessage: 'Type the title…',
+  },
+});
 
 const blockRenderMap = Map({
   unstyled: {
@@ -17,6 +29,7 @@ const blockRenderMap = Map({
 
 const extendedBlockRenderMap = DefaultDraftBlockRenderMap.merge(blockRenderMap);
 
+@injectIntl
 /**
  * Edit title tile class.
  * @class Edit
@@ -30,7 +43,14 @@ export default class Edit extends Component {
    */
   static propTypes = {
     properties: PropTypes.objectOf(PropTypes.any).isRequired,
-    onChange: PropTypes.func.isRequired,
+    selected: PropTypes.bool.isRequired,
+    intl: intlShape.isRequired,
+    index: PropTypes.number.isRequired,
+    onChangeField: PropTypes.func.isRequired,
+    onSelectTile: PropTypes.func.isRequired,
+    onDeleteTile: PropTypes.func.isRequired,
+    onAddTile: PropTypes.func.isRequired,
+    tile: PropTypes.string.isRequired,
   };
 
   /**
@@ -57,17 +77,53 @@ export default class Edit extends Component {
   }
 
   /**
+   * Component did mount lifecycle method
+   * @method componentDidMount
+   * @returns {undefined}
+   */
+  componentDidMount() {
+    if (this.node) {
+      this.node.focus();
+    }
+  }
+
+  /**
+   * Component will receive props
+   * @method componentWillReceiveProps
+   * @param {Object} nextProps Next properties
+   * @returns {undefined}
+   */
+  componentWillReceiveProps(nextProps) {
+    if (
+      nextProps.properties.title &&
+      this.props.properties.title !== nextProps.properties.title &&
+      !this.props.selected
+    ) {
+      const contentState = stateFromHTML(nextProps.properties.title);
+      this.setState({
+        editorState: nextProps.properties.title
+          ? EditorState.createWithContent(contentState)
+          : EditorState.createEmpty(),
+      });
+    }
+
+    if (!this.props.selected && nextProps.selected) {
+      this.node.focus();
+    }
+  }
+
+  /**
    * Change handler
    * @method onChange
    * @param {object} editorState Editor state.
    * @returns {undefined}
    */
   onChange(editorState) {
-    this.setState({ editorState });
-    this.props.onChange({
-      properties: {
-        title: editorState.getCurrentContent().getPlainText(),
-      },
+    this.setState({ editorState }, () => {
+      this.props.onChangeField(
+        'title',
+        editorState.getCurrentContent().getPlainText(),
+      );
     });
   }
 
@@ -81,13 +137,37 @@ export default class Edit extends Component {
       return <div />;
     }
     return (
-      <Editor
-        onChange={this.onChange}
-        editorState={this.state.editorState}
-        blockRenderMap={extendedBlockRenderMap}
-        handleReturn={() => true}
-        blockStyleFn={() => 'documentFirstHeading'}
-      />
+      <div
+        onClick={() => this.props.onSelectTile(this.props.tile)}
+        className={`tile title${this.props.selected ? ' selected' : ''}`}
+      >
+        <Editor
+          onChange={this.onChange}
+          editorState={this.state.editorState}
+          blockRenderMap={extendedBlockRenderMap}
+          handleReturn={() => {
+            this.props.onSelectTile(
+              this.props.onAddTile('text', this.props.index + 1),
+            );
+            return 'handled';
+          }}
+          placeholder={this.props.intl.formatMessage(messages.title)}
+          blockStyleFn={() => 'documentFirstHeading'}
+          ref={node => {
+            this.node = node;
+          }}
+        />
+        {this.props.selected && (
+          <Button
+            icon
+            basic
+            onClick={() => this.props.onDeleteTile(this.props.tile)}
+            className="tile-delete-button"
+          >
+            <Icon name={trashSVG} size="18px" />
+          </Button>
+        )}
+      </div>
     );
   }
 }

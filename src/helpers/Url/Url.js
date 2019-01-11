@@ -4,6 +4,7 @@
  */
 
 import { last, memoize } from 'lodash';
+import { settings } from '~/config';
 
 /**
  * Get base url.
@@ -11,28 +12,15 @@ import { last, memoize } from 'lodash';
  * @param {string} url Url to be parsed.
  * @return {string} Base url of content object.
  */
-export const getBaseUrl = memoize(
-  url =>
-    url
-      .replace(/\?.*$/, '')
-      .replace('/add', '')
-      .replace('/contents', '')
-      .replace('/delete', '')
-      .replace('/diff', '')
-      .replace('/edit', '')
-      .replace('/history', '')
-      .replace('/layout', '')
-      .replace('/login', '')
-      .replace('/logout', '')
-      .replace('/register', '')
-      .replace('/sharing', '')
-      .replace('/search', '')
-      .replace('/change-password', '')
-      .replace(/\/controlpanel\/.*$/, '')
-      .replace('/controlpanel', '')
-      .replace('/personal-information', '')
-      .replace('/personal-preferences', '') || '/',
-);
+export const getBaseUrl = memoize(url => {
+  let adjustedUrl = settings.nonContentRoutes.reduce(
+    (acc, item) => acc.replace(item, ''),
+    url,
+  );
+
+  adjustedUrl = adjustedUrl || '/';
+  return adjustedUrl === '/' ? '' : adjustedUrl;
+});
 
 /**
  * Get view of an url.

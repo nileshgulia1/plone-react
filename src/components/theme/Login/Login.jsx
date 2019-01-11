@@ -9,7 +9,7 @@ import Helmet from 'react-helmet';
 import { asyncConnect } from 'redux-connect';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { browserHistory, Link } from 'react-router';
+import { Router, Link } from 'react-router-dom';
 import { isEmpty } from 'lodash';
 import {
   Container,
@@ -26,6 +26,8 @@ import {
   injectIntl,
   intlShape,
 } from 'react-intl';
+import qs from 'query-string';
+import { withRouter } from 'react-router-dom';
 
 import { login, purgeMessages } from '../../../actions';
 
@@ -58,7 +60,7 @@ const messages = defineMessages({
     error: state.userSession.login.error,
     loading: state.userSession.login.loading,
     token: state.userSession.token,
-    returnUrl: props.location.query.return_url || '/',
+    returnUrl: qs.parse(props.location.search).return_url || '/',
   }),
   dispatch => bindActionCreators({ login, purgeMessages }, dispatch),
 )
@@ -116,7 +118,7 @@ export class LoginComponent extends Component {
    */
   componentWillReceiveProps(nextProps) {
     if (nextProps.token) {
-      browserHistory.push(this.props.returnUrl || '/');
+      this.props.history.push(this.props.returnUrl || '/');
       this.props.purgeMessages();
     }
   }
@@ -245,12 +247,12 @@ export class LoginComponent extends Component {
                             defaultMessage="If you have forgotten your password, {forgotpassword}"
                             values={{
                               forgotpassword: (
-                                <a href="#">
+                                <Link to="/password-reset">
                                   <FormattedMessage
                                     id="we can send you a new one"
                                     defaultMessage="we can send you a new one"
                                   />
-                                </a>
+                                </Link>
                               ),
                             }}
                           />
@@ -305,4 +307,4 @@ export default asyncConnect([
       return Promise.resolve({});
     },
   },
-])(LoginComponent);
+])(withRouter(LoginComponent));

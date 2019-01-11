@@ -2,6 +2,7 @@
 
 exports[`Contents renders a contents component 1`] = `
 <div
+  className="ui container"
   id="page-contents"
 >
   <div
@@ -137,10 +138,8 @@ exports[`Contents renders a contents component 1`] = `
                     className="ui input prompt"
                   >
                     <input
-                      disabled={undefined}
                       onChange={[Function]}
                       placeholder="Filter…"
-                      tabIndex={undefined}
                       type="text"
                       value=""
                     />
@@ -163,8 +162,8 @@ exports[`Contents renders a contents component 1`] = `
             >
               <a
                 className="section"
+                href="/contents"
                 onClick={[Function]}
-                style={Object {}}
                 title="Home"
               >
                 <i
@@ -179,17 +178,13 @@ exports[`Contents renders a contents component 1`] = `
               </div>
               <div
                 className="active section"
-                href={undefined}
                 onClick={[Function]}
               >
                 Blog
               </div>
             </div>
             <div
-              aria-busy={undefined}
-              aria-disabled={undefined}
               aria-expanded={false}
-              aria-multiselectable={undefined}
               className="ui item dropdown right"
               onBlur={[Function]}
               onChange={[Function]}
@@ -221,9 +216,6 @@ exports[`Contents renders a contents component 1`] = `
                   className="scrolling menu transition"
                 >
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -235,9 +227,6 @@ exports[`Contents renders a contents component 1`] = `
                     Title
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -249,9 +238,6 @@ exports[`Contents renders a contents component 1`] = `
                     Last modified
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -263,9 +249,6 @@ exports[`Contents renders a contents component 1`] = `
                     Publication date
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -277,9 +260,6 @@ exports[`Contents renders a contents component 1`] = `
                     Review state
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -291,9 +271,6 @@ exports[`Contents renders a contents component 1`] = `
                     ID
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -305,9 +282,6 @@ exports[`Contents renders a contents component 1`] = `
                     Expiration date
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -319,9 +293,6 @@ exports[`Contents renders a contents component 1`] = `
                     Created on
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -333,9 +304,6 @@ exports[`Contents renders a contents component 1`] = `
                     Tags
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -347,9 +315,6 @@ exports[`Contents renders a contents component 1`] = `
                     Type
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -361,9 +326,6 @@ exports[`Contents renders a contents component 1`] = `
                     Folder
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -375,9 +337,6 @@ exports[`Contents renders a contents component 1`] = `
                     Excluded from navigation
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -389,9 +348,6 @@ exports[`Contents renders a contents component 1`] = `
                     Object Size
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -403,9 +359,6 @@ exports[`Contents renders a contents component 1`] = `
                     Last comment date
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -417,9 +370,6 @@ exports[`Contents renders a contents component 1`] = `
                     Total comments
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -431,9 +381,6 @@ exports[`Contents renders a contents component 1`] = `
                     End Date
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -445,9 +392,6 @@ exports[`Contents renders a contents component 1`] = `
                     Description
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -459,9 +403,6 @@ exports[`Contents renders a contents component 1`] = `
                     Creator
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -473,9 +414,6 @@ exports[`Contents renders a contents component 1`] = `
                     Location
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -487,9 +425,6 @@ exports[`Contents renders a contents component 1`] = `
                     UID
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -501,9 +436,6 @@ exports[`Contents renders a contents component 1`] = `
                     Start Date
                   </div>
                   <div
-                    aria-checked={undefined}
-                    aria-disabled={undefined}
-                    aria-selected={undefined}
                     className="item"
                     onClick={[Function]}
                     role="option"
@@ -531,10 +463,7 @@ exports[`Contents renders a contents component 1`] = `
                   className=""
                 >
                   <div
-                    aria-busy={undefined}
-                    aria-disabled={undefined}
                     aria-expanded={false}
-                    aria-multiselectable={undefined}
                     className="ui simple dropdown"
                     onBlur={[Function]}
                     onChange={[Function]}
@@ -557,9 +486,6 @@ exports[`Contents renders a contents component 1`] = `
                         Rearrange items by…
                       </div>
                       <div
-                        aria-checked={undefined}
-                        aria-disabled={undefined}
-                        aria-selected={undefined}
                         className="item"
                         onClick={[Function]}
                         role="option"
@@ -573,9 +499,6 @@ exports[`Contents renders a contents component 1`] = `
                           className="menu transition"
                         >
                           <div
-                            aria-checked={undefined}
-                            aria-disabled={undefined}
-                            aria-selected={undefined}
                             className="item"
                             onClick={[Function]}
                             role="option"
@@ -590,9 +513,6 @@ exports[`Contents renders a contents component 1`] = `
                             </span>
                           </div>
                           <div
-                            aria-checked={undefined}
-                            aria-disabled={undefined}
-                            aria-selected={undefined}
                             className="item"
                             onClick={[Function]}
                             role="option"
@@ -609,9 +529,6 @@ exports[`Contents renders a contents component 1`] = `
                         </div>
                       </div>
                       <div
-                        aria-checked={undefined}
-                        aria-disabled={undefined}
-                        aria-selected={undefined}
                         className="item"
                         onClick={[Function]}
                         role="option"
@@ -625,9 +542,6 @@ exports[`Contents renders a contents component 1`] = `
                           className="menu transition"
                         >
                           <div
-                            aria-checked={undefined}
-                            aria-disabled={undefined}
-                            aria-selected={undefined}
                             className="item"
                             onClick={[Function]}
                             role="option"
@@ -642,9 +556,6 @@ exports[`Contents renders a contents component 1`] = `
                             </span>
                           </div>
                           <div
-                            aria-checked={undefined}
-                            aria-disabled={undefined}
-                            aria-selected={undefined}
                             className="item"
                             onClick={[Function]}
                             role="option"
@@ -661,9 +572,6 @@ exports[`Contents renders a contents component 1`] = `
                         </div>
                       </div>
                       <div
-                        aria-checked={undefined}
-                        aria-disabled={undefined}
-                        aria-selected={undefined}
                         className="item"
                         onClick={[Function]}
                         role="option"
@@ -677,9 +585,6 @@ exports[`Contents renders a contents component 1`] = `
                           className="menu transition"
                         >
                           <div
-                            aria-checked={undefined}
-                            aria-disabled={undefined}
-                            aria-selected={undefined}
                             className="item"
                             onClick={[Function]}
                             role="option"
@@ -694,9 +599,6 @@ exports[`Contents renders a contents component 1`] = `
                             </span>
                           </div>
                           <div
-                            aria-checked={undefined}
-                            aria-disabled={undefined}
-                            aria-selected={undefined}
                             className="item"
                             onClick={[Function]}
                             role="option"
@@ -713,9 +615,6 @@ exports[`Contents renders a contents component 1`] = `
                         </div>
                       </div>
                       <div
-                        aria-checked={undefined}
-                        aria-disabled={undefined}
-                        aria-selected={undefined}
                         className="item"
                         onClick={[Function]}
                         role="option"
@@ -729,9 +628,6 @@ exports[`Contents renders a contents component 1`] = `
                           className="menu transition"
                         >
                           <div
-                            aria-checked={undefined}
-                            aria-disabled={undefined}
-                            aria-selected={undefined}
                             className="item"
                             onClick={[Function]}
                             role="option"
@@ -746,9 +642,6 @@ exports[`Contents renders a contents component 1`] = `
                             </span>
                           </div>
                           <div
-                            aria-checked={undefined}
-                            aria-disabled={undefined}
-                            aria-selected={undefined}
                             className="item"
                             onClick={[Function]}
                             role="option"
@@ -765,9 +658,6 @@ exports[`Contents renders a contents component 1`] = `
                         </div>
                       </div>
                       <div
-                        aria-checked={undefined}
-                        aria-disabled={undefined}
-                        aria-selected={undefined}
                         className="item"
                         onClick={[Function]}
                         role="option"
@@ -781,9 +671,6 @@ exports[`Contents renders a contents component 1`] = `
                           className="menu transition"
                         >
                           <div
-                            aria-checked={undefined}
-                            aria-disabled={undefined}
-                            aria-selected={undefined}
                             className="item"
                             onClick={[Function]}
                             role="option"
@@ -798,9 +685,6 @@ exports[`Contents renders a contents component 1`] = `
                             </span>
                           </div>
                           <div
-                            aria-checked={undefined}
-                            aria-disabled={undefined}
-                            aria-selected={undefined}
                             className="item"
                             onClick={[Function]}
                             role="option"
@@ -817,9 +701,6 @@ exports[`Contents renders a contents component 1`] = `
                         </div>
                       </div>
                       <div
-                        aria-checked={undefined}
-                        aria-disabled={undefined}
-                        aria-selected={undefined}
                         className="item"
                         onClick={[Function]}
                         role="option"
@@ -833,9 +714,6 @@ exports[`Contents renders a contents component 1`] = `
                           className="menu transition"
                         >
                           <div
-                            aria-checked={undefined}
-                            aria-disabled={undefined}
-                            aria-selected={undefined}
                             className="item"
                             onClick={[Function]}
                             role="option"
@@ -850,9 +728,6 @@ exports[`Contents renders a contents component 1`] = `
                             </span>
                           </div>
                           <div
-                            aria-checked={undefined}
-                            aria-disabled={undefined}
-                            aria-selected={undefined}
                             className="item"
                             onClick={[Function]}
                             role="option"
@@ -875,10 +750,7 @@ exports[`Contents renders a contents component 1`] = `
                   className=""
                 >
                   <div
-                    aria-busy={undefined}
-                    aria-disabled={undefined}
                     aria-expanded={false}
-                    aria-multiselectable={undefined}
                     className="ui dropdown"
                     onBlur={[Function]}
                     onChange={[Function]}
@@ -901,9 +773,6 @@ exports[`Contents renders a contents component 1`] = `
                         Select…
                       </div>
                       <div
-                        aria-checked={undefined}
-                        aria-disabled={undefined}
-                        aria-selected={undefined}
                         className="item"
                         onClick={[Function]}
                         role="option"
@@ -918,9 +787,6 @@ exports[`Contents renders a contents component 1`] = `
                         </span>
                       </div>
                       <div
-                        aria-checked={undefined}
-                        aria-disabled={undefined}
-                        aria-selected={undefined}
                         className="item"
                         onClick={[Function]}
                         role="option"
@@ -946,10 +812,8 @@ exports[`Contents renders a contents component 1`] = `
                         className="ui left icon input search"
                       >
                         <input
-                          disabled={undefined}
                           onChange={[Function]}
                           placeholder="Filter…"
-                          tabIndex={undefined}
                           type="text"
                         />
                         <i
@@ -1044,8 +908,8 @@ exports[`Contents renders a contents component 1`] = `
                   className=""
                 >
                   <a
+                    href="/blog"
                     onClick={[Function]}
-                    style={Object {}}
                   >
                     <i
                       aria-hidden="true"
@@ -1082,10 +946,7 @@ exports[`Contents renders a contents component 1`] = `
                   className="right aligned"
                 >
                   <div
-                    aria-busy={undefined}
-                    aria-disabled={undefined}
                     aria-expanded={false}
-                    aria-multiselectable={undefined}
                     className="ui dropdown"
                     onBlur={[Function]}
                     onChange={[Function]}
@@ -1110,8 +971,8 @@ exports[`Contents renders a contents component 1`] = `
                     >
                       <a
                         className="item"
+                        href="/blog/edit"
                         onClick={[Function]}
-                        style={Object {}}
                       >
                         <i
                           aria-hidden="true"
@@ -1124,8 +985,8 @@ exports[`Contents renders a contents component 1`] = `
                       </a>
                       <a
                         className="item"
+                        href="/blog"
                         onClick={[Function]}
-                        style={Object {}}
                       >
                         <i
                           aria-hidden="true"
@@ -1140,9 +1001,6 @@ exports[`Contents renders a contents component 1`] = `
                         className="divider"
                       />
                       <div
-                        aria-checked={undefined}
-                        aria-disabled={undefined}
-                        aria-selected={undefined}
                         className="item"
                         onClick={[Function]}
                         role="option"
@@ -1157,9 +1015,6 @@ exports[`Contents renders a contents component 1`] = `
                         </span>
                       </div>
                       <div
-                        aria-checked={undefined}
-                        aria-disabled={undefined}
-                        aria-selected={undefined}
                         className="item"
                         onClick={[Function]}
                         role="option"
@@ -1174,9 +1029,6 @@ exports[`Contents renders a contents component 1`] = `
                         </span>
                       </div>
                       <div
-                        aria-checked={undefined}
-                        aria-disabled={undefined}
-                        aria-selected={undefined}
                         className="item"
                         onClick={[Function]}
                         role="option"
@@ -1194,9 +1046,6 @@ exports[`Contents renders a contents component 1`] = `
                         className="divider"
                       />
                       <div
-                        aria-checked={undefined}
-                        aria-disabled={undefined}
-                        aria-selected={undefined}
                         className="item"
                         onClick={[Function]}
                         role="option"
@@ -1211,9 +1060,6 @@ exports[`Contents renders a contents component 1`] = `
                         </span>
                       </div>
                       <div
-                        aria-checked={undefined}
-                        aria-disabled={undefined}
-                        aria-selected={undefined}
                         className="item"
                         onClick={[Function]}
                         role="option"
